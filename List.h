@@ -65,6 +65,7 @@ class List{
         void traverse(VST& visit);
         int uniquify();
         ListNodePosi(T) search(T const& e, int n, ListNodePosi(T) p) const;
+        bool valid(ListNodePosi(T) p) const;
 };
 
 template <typename T> 
@@ -225,6 +226,11 @@ template <typename T>
 ListNodePosi(T) List<T>::insertAsFirst(const T& e)
 {
     return insertA(header, e);
+}
+template <typename T>
+bool List<T>::valid(ListNodePosi(T) p) const
+{
+    return p != NULL;
 }
 
 #endif
