@@ -21,6 +21,7 @@ template <typename T> struct BinNode{
     BinNodePosi(T) insertAsLC(T const&); // left child
     BinNodePosi(T) insertAsRC(T const&); // right child
     BinNodePosi(T) succ(); // 中序遍历下的当前节点的直接后继
+    BinNodePosi(T) pred(); // 中序遍历下的当前节点的直接前驱
 	template <typename VST> void travLevel(VST&  visit); // 层次遍历	
     template <typename VST> void travPre(VST &); // 先序遍历
     template <typename VST> void travIn(VST & ); // 中序遍历 
@@ -28,6 +29,7 @@ template <typename T> struct BinNode{
 
 	bool IsRChild(const BinNodePosi(T) node) { return node->parent != NULL && node->parent->rc == node; }
 	bool IsLChild(const BinNodePosi(T) node) { return node->parent != NULL && node->parent->lc == node; }
+
 
 };
 
@@ -56,7 +58,16 @@ template < typename T> class BinTree{
         template <typename VST> void travPrev(BinNodePosi(T) x, VST& v);
         template <typename VST> void travIn(BinNodePosi(T) x, VST& v);
         template <typename VST> void travPost(BinNodePosi(T) x, VST& v);
+        template <typename VST> void travIn_I3(BinNodePosi(T) node, VST& visit);
 
+        bool HasLChild(BinNode<T>& node)
+        {
+            return node.lc != NULL;
+        }
+        bool HasRChild(BinNode<T>& node)
+        {
+            return node.rc != NULL;
+        }
 };
 
 template <typename T> BinNodePosi(T) BinNode<T>::insertAsLC(T const &e )
@@ -112,6 +123,24 @@ template <typename VST> void BinNode<T>::travPost(VST& vst)
         rc->travPost(vst);
     }
     vst(data);
+}
+template <typename T> 
+BinNodePosi(T) BinNode<T>::pred()
+{
+    BinNodePosi(T) s= this;
+    if (lc != NULL)
+    {
+        s= lc;
+        while(s->rc != NULL) s = s->rc;
+    }
+    else
+    {
+        while(IsLChild(s))
+        {
+            s = s->parent;
+        }
+        s = s->parent;
+    }
 }
 template <typename T> BinNodePosi(T) BinNode<T>::succ(){
     BinNodePosi(T) s= this;
@@ -271,5 +300,30 @@ template <typename VST>
 void BinTree<T>::travLevel(BinNodePosi(T) x, VST& visit)
 {
     x->travLevel(visit);
+}
+template <typename T>
+template <typename VST>
+void BinTree<T>::travIn_I3(BinNodePosi(T) node, VST& visit)
+{
+    bool backtrack = false;
+    while(true)
+    {
+        if(!backtrack && HasLChild(*node))
+        {
+            node = node->lc;
+        }
+        else
+        {
+            visit(node->data);
+            if(HasRChild(*node)){
+                node = node->rc;
+                backtrack = false;
+            }
+            else{
+                if(!(node = node->succ())) break;
+                backtrack = true;
+            }
+        }
+    }
 }
 #endif

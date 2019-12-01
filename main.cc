@@ -1,7 +1,7 @@
 #include "BinTree.h"
 #include <iostream>
 #include "List.h"
-
+#include "Graph.h"
 template <typename T>
 struct Visit
 {
@@ -37,8 +37,13 @@ void testList()
     Visit<int> v;
     l.traverse(v);
 }
+void testGraphMatrix()
+{
+	GraphMatrix<int,int> graph;
+
+}
 int main(int argc, char* argv[])
 {
-    testList();
+    
 
 }
