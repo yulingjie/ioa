@@ -1,5 +1,5 @@
 #include "BinTree.h"
-#include <list>
+#include "List.h"
 #define N_CHAR (0x80 - 0x20)
 
 struct HuffChar{
@@ -15,6 +15,6 @@ struct HuffChar{
     }
 };
 #define HuffTree BinTree<HuffChar>
-typedef std::list<HuffTree*> HuffForest;
+typedef List<HuffTree*> HuffForest;
 
 HuffTree* generateTree(HuffForest* forest);
