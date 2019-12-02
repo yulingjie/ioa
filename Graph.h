@@ -34,7 +34,6 @@ template <typename Tv, typename Te>
 class Graph{
     protected:
     protected:
-        virtual void reset()= 0;
         
         virtual int & dTime(int i) =0;
         virtual VStatus & status(int i) = 0;
@@ -49,7 +48,53 @@ class Graph{
 
         virtual int vertexNum() = 0;
         virtual int edgeNum() = 0;
+
     private:
+        void reset()
+        {
+            for(int i = 0; i < vertexNum(); ++i)
+            {
+                status(i) = UNDISCOVERED;
+                dTime(i) = fTime(i) = -1;
+                parent(i) = -1;
+                priority(i) = INT_MAX;
+                for (int j =0; j < vertexNum(); ++j)
+                {
+                    if(exists(i,j)) type(i,j) = UNDETERMINED;
+                }
+            }
+        }
+        void DFS(int v, int & clock)
+        {
+            dTime(v) = ++clock;
+            status(v) = DISCOVERED;
+            for(int u = firstNbr(v); -1 <u; u = nextNbr(v, u))
+            {
+                switch(status(u))
+                {
+                    case UNDISCOVERED:
+                        {
+                            type(v,u) = TREE;
+                            parent(u) = v;
+                            DFS(u,clock);
+                            break;
+                        }
+                    case DISCOVERED:
+                        {
+                            type(v,u) =BACKWARD;
+                            break;
+                        }
+                    default:
+                        {
+                            type(v,u) = dTime(v) < dTime(u)? FORWARD : CROSS;
+                            break;
+                        }
+                }
+            }
+            status(v) = VISITED;
+            fTime(v) = ++clock;
+        }
+ 
         void BFS(int v, int & clock)
         {
             std::queue<int> Q;
@@ -90,6 +135,20 @@ class Graph{
             }
             while(s != (v = (++v% vertexNum())));
         }
+        void dfs(int s)
+        {
+            reset();
+            int clock = 0;
+            int v= s;
+            do
+            {
+                if (UNDISCOVERED == status(v)) 
+                {
+                    DFS(v,clock);
+                }
+            }
+            while(s != (v= (++v%vertexNum())));
+        }
 };
 
 template <typename Tv, typename Te>
@@ -104,21 +163,7 @@ class GraphMatrix: public Graph<Tv, Te>
     protected:
         int vertexNum(){return n;}
         int edgeNum(){return e;}
-        void reset()
-        {
-            for(int i = 0; i < n; ++i)
-            {
-                status(i) = UNDISCOVERED;
-                dTime(i) = fTime(i) = -1;
-                parent(i) = -1;
-                priority(i) = INT_MAX;
-                for (int j =0; j < n; ++j)
-                {
-                    if(exists(i,j)) type(i,j) = UNDETERMINED;
-                }
-            }
-        }
-        
+       
     public:
         GraphMatrix()
             :n(0),
