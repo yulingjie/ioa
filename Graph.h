@@ -3,6 +3,7 @@
 #include <climits>
 #include <vector>
 #include <queue>
+#include <stack>
 typedef enum {UNDISCOVERED, DISCOVERED, VISITED} VStatus;
 template <typename Tv>
 struct Vertex{
@@ -29,6 +30,34 @@ struct Edge{
     Edge(Te const& d, int w):
         data(d), weight(w), type(UNDETERMINED){}
 };
+template <typename Tv, typename Te>
+class Graph;
+template <typename Tv, typename Te>
+struct PrimPU
+{
+
+    virtual void operator()( Graph<Tv, Te>* g,int uk, int v)
+    {
+        if(UNDISCOVERED != g->status(v)) return;
+        if(g->priority(v) > g->weight(uk, v))
+        {
+            g->priority(v) = g->weight(uk, v);
+            g->parent(v) = uk;
+        }
+    }
+};
+template <typename Tv, typename Te>
+struct DijkstraPU{
+    virtual void operator()(Graph<Tv, Te>* g, int uk, int v)
+    {
+        if(UNDISCOVERED != g->status(v)) return ;
+        if(g->priority(v) > g->weight(uk,v) + g->priority(uk))
+        {
+            g->priority(v) = g->weight(uk,v) + g->priority(uk);
+            g->parent(v) = uk;
+        }
+    }
+};
 
 template <typename Tv, typename Te>
 class Graph{
@@ -48,6 +77,7 @@ class Graph{
 
         virtual int vertexNum() = 0;
         virtual int edgeNum() = 0;
+        virtual Tv& vertex(int v);
 
     private:
         void reset()
@@ -149,6 +179,70 @@ class Graph{
             }
             while(s != (v= (++v%vertexNum())));
         }
+        bool TSort(int v,int & clock, std::stack<Tv>* S){
+            dTime(v) = ++clock;
+            status(v)  = DISCOVERED;
+            for (int u = firstNbr(v); -1 <u; u = nextNbr(v,u))
+            {
+                switch (status(u)){
+                    case UNDISCOVERED:
+                        {
+                            parent(u) =v;
+                            type(v,u) = TREE;
+                            if(!TSort(u, clock, S)) return false;
+                            break;
+                        }
+                    case DISCOVERED:
+                        {
+                            type(v,u) = BACKWARD;
+                            return false;
+                        }
+                    default:
+                        type(v,u) = dTime(v) < dTime(u) ? FORWARD :CROSS; break;
+                }
+            }
+            status(v) = VISITED;
+            S->push(vertex(v));
+
+        }
+        template <typename PU>
+        void pfs(int s, PU prioUpdater)
+        {
+            priority(s) = 0;
+            status(s) = VISITED;
+            parent(s) = -1;
+            while(1)
+            {
+                for(int w = firstNbr(s); -1 <w;w = nextNbr(s, w))
+                {
+                    prioUpdater(this, s, w);
+                }
+                for (int shortest  = INT_MAX, w= 0; w < vertexNum(); ++w)
+                {
+                    if(UNDISCOVERED == status(w))
+                    {
+                        if(shortest > priority(w))
+                        {
+                            shortest = priority(w);
+                            s = w;
+                        }
+                    }
+                }
+                if(VISITED == status(s)) break;
+                status(s)  = VISITED ;
+                type(parent(s),s)  = TREE;
+
+            }// while
+        }
+        void Prim()
+        {
+            pfs(0, PrimPU<Tv, Te>());
+        }
+        void Dijkstra()
+        {
+            pfs(0, DijkstraPU<Tv,Te>());
+        }
+
 };
 
 template <typename Tv, typename Te>
@@ -159,17 +253,17 @@ class GraphMatrix: public Graph<Tv, Te>
         std::vector<std::vector< Edge<Te>* > > E;
         int n; // 定点数
         int e; // 边数
- 
+
     protected:
         int vertexNum(){return n;}
         int edgeNum(){return e;}
-       
+
     public:
         GraphMatrix()
             :n(0),
             e(0)
-        {
-        }
+    {
+    }
         ~GraphMatrix(){
             for(int j = 0; j < n; ++j)
             {
@@ -187,7 +281,7 @@ class GraphMatrix: public Graph<Tv, Te>
         int & fTime(int i) { return V[i].fTime;}
         int & parent(int i ){return V[i].parent;}
         int & priority(int i) {return V[i].priority;}
-        
+
         bool exists(int i, int j){
             return (0 <= i) && (i < n) && (0 <= j) && (j < n)
                 && E[i][j] != NULL;
@@ -267,6 +361,6 @@ class GraphMatrix: public Graph<Tv, Te>
             }
         }
 
-    
+
 };
 #endif
