@@ -33,10 +33,15 @@ template <typename T> struct BinNode{
 
 };
 
-template < typename T> class BinTree{
+template < typename T>
+class BinTree{
+    private:
+
+        static int removeAt(BinNodePosi(T) x);
 
     protected:
         int _size;
+    protected:
         BinNodePosi(T) _root;
         virtual int updateHeight(BinNodePosi(T) x);// update height for node x
         void updateHeightAbove(BinNodePosi(T) x); // update height for x and its ancestors
@@ -51,8 +56,8 @@ template < typename T> class BinTree{
         BinNodePosi(T) attachAsRC(BinNodePosi(T) x, BinTree<T> * &S);
         BinNodePosi(T) attachAsLC(BinNodePosi(T) x, BinTree<T>* &S);
         BinNodePosi(T) insertAsRoot(const T& x);
-        int remove(BinNodePosi(T) x);
-        static int removeAt(BinNodePosi(T) x);
+        virtual int remove(BinNodePosi(T) x);
+
         BinTree<T>* secede(BinNodePosi(T) x);
         template <typename VST> void travLevel(BinNodePosi(T) x, VST& v);
         template <typename VST> void travPrev(BinNodePosi(T) x, VST& v);

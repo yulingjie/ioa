@@ -20,8 +20,10 @@ flags = [
     '-I',
     '.',
     '-isystem',
-    '/usr/include/c++/v1'
-]
+    '/usr/local/include',
+    '-isystem',
+    '/usr/include/c++/v1',
+    ]
 
 if compilation_database_folder:
     database = ycm_core.CompilationDatabase(compilation_database_folder)
@@ -68,14 +70,14 @@ def FlagsForFile(filename):
         # python list, but a "list-like" StringVec object
         compilation_info = database.GetCompilationInfoForFile(filename)
         final_flags = PrepareClangFlags(
-            MakeRelativePathsInFlagsAbsolute(
-                compilation_info.compiler_flags_,
-                compilation_info.compiler_working_dir_),
-            filename)
+                MakeRelativePathsInFlagsAbsolute(
+                    compilation_info.compiler_flags_,
+                    compilation_info.compiler_working_dir_),
+                filename)
     else:
         relative_to = DirectoryOfThisScript()
         final_flags = MakeRelativePathsInFlagsAbsolute(flags, relative_to)
 
     return {
-        'flags': final_flags,
-        'do_cache': True}
+            'flags': final_flags,
+            'do_cache': True}

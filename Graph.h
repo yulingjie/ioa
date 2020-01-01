@@ -58,6 +58,18 @@ struct DijkstraPU{
         }
     }
 };
+template <typename Tv, typename Te>
+struct BFSPU{
+    virtual void operator()(Graph<Tv, Te>* g, int uk, int v)
+    {
+        if(UNDISCOVERED != g->status(v)) return;
+        if(g->priority(v) > g->priority(uk)  + 1)
+        {
+            g->priority(v) = g->priority(uk) +1;
+            g->parent(v) = uk;
+        }
+    }
+};
 
 template <typename Tv, typename Te>
 class Graph{
@@ -150,6 +162,46 @@ class Graph{
                 }
                 status(v) = VISITED;
             }
+        }
+#define hca(x) (fTime(x))
+        void BCC(int v, int &clock, std::stack<int>&S)
+        {
+            hca(v) = dTime(v) = ++clock;
+            status(v) = DISCOVERED;
+            S.push(v);
+            for(int u = firstNbr(v); -1 < u; u = nextNbr(v,u))
+            {
+               switch(status(u))
+               {
+                 case UNDISCOVERED:
+                     {
+                         parent(u) = v;
+                         type(v,u) = TREE;
+                         BCC(u,clock, S);
+                         if(hca(u) < dTime(v))
+                         {
+                             hca(v) = min(hca(v) ,hca(u));
+                         }
+                         else
+                         {
+                             while(v != S.top())
+                             {
+                                 S.pop();
+                             }
+                         }
+                         break;
+                     }
+                case DISCOVERED:
+                     type(v,u) = BACKWARD;
+                     if(u != parent(v)) hca(v) = min(hca(v), dTime(u));
+                     break;
+                default:
+                     type(v,u) = (dTime(v) < dTime(u) ) ? FORWARD: CROSS;
+                     break;
+               }
+               status(v) = VISITED;
+            }
+
         }
     public:
         void bfs(int s) // s 为起始顶点
