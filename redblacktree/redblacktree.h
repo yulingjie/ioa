@@ -10,73 +10,106 @@ const int BLACK_RED = 4;
 template<class T>
 class BinNode
 {
-public:
-    BinNode (const T& data)
-        :_data(data)
-    {
-        _color = BLACK;
-        _lc = NULL;
-        _rc = NULL;
-        _p = NULL;
-    }
-    virtual ~BinNode (){}
+    public:
+        BinNode (const T& data)
+            :_data(data)
+        {
+            _color = BLACK;
+            _lc = NULL;
+            _rc = NULL;
+            _p = NULL;
+        }
+        virtual ~BinNode (){}
 
-    int & color() {return _color;}
-    BinNode*& lc(){return _lc;}
-    BinNode*& rc(){return _rc;}
-    BinNode*& p(){return _p;}
+        int & color() {return _color;}
+        BinNode*& lc(){return _lc;}
+        BinNode*& rc(){return _rc;}
+        BinNode*& p(){return _p;}
 
-    T& data(){return _data;}
+        T& data(){return _data;}
 
-private:
-private:
-    /* data */
-    int _color;
-    BinNode* _lc;
-    BinNode* _rc;
-    BinNode* _p;
-    T _data;
+    private:
+    private:
+        /* data */
+        int _color;
+        BinNode* _lc;
+        BinNode* _rc;
+        BinNode* _p;
+        T _data;
 };
 
-template<class T>
+template<class T,class Node>
 class BinTree
 {
     public:
+class BinNode
+{
+    public:
+        BinNode (const Node& data)
+            :_data(data)
+        {
+            _color = BLACK;
+            _lc = NULL;
+            _rc = NULL;
+            _p = NULL;
+        }
+        virtual ~BinNode (){}
 
-        static BinNode<T>* nil;
+        int & color() {return _color;}
+        Node*& lc(){return _lc;}
+        Node*& rc(){return _rc;}
+        Node*& p(){return _p;}
+
+        T& data(){return _data;}
+
+    private:
+    private:
+        /* data */
+        int _color;
+        BinNode* _lc;
+        BinNode* _rc;
+        BinNode* _p;
+        T _data;
+};
+
+
+    public:
+
+        static Node* nil;
     public:
         BinTree()
         {
             _root = nil;
         }
-        void insert(BinNode<T>* node);
-        BinNode<T>* search(const T & t) const;
+        void insert(Node* node);
+        Node* search(const T & t) const;
 
-        void deletenode(BinNode<T>* z);
+        void deletenode(Node* z);
         void dfs();
         void bfs();
-        BinNode<T>* root(){return _root;}
-        void LeftRotate(BinNode<T>* x) {left_rotate(x);}
-        void RightRotate(BinNode<T>* x){right_rotate(x);}
+        Node* root(){return _root;}
+        void LeftRotate(Node* x) {left_rotate(x);}
+        void RightRotate(Node* x){right_rotate(x);}
+    protected:
+        virtual void left_rotate(Node* x);
 
+        virtual void right_rotate(Node* x);
     private:
-        BinNode<T>* search_recur(BinNode<T>* node, const T& t) const;
-        void insert_fixup(BinNode<T>* node);
-        void left_rotate(BinNode<T>* x);
-        void right_rotate(BinNode<T>* x);
-        void transplant(BinNode<T>* u, BinNode<T>* v);
-        BinNode<T>* minimum(BinNode<T>* node);
+        Node* search_recur(Node* node, const T& t) const;
+        void insert_fixup(Node* node);
+        void transplant(Node* u, Node* v);
+        Node* minimum(Node* node);
 
-        void delete_fixup(BinNode<T>* x);
+        void delete_fixup(Node* x);
 
-        void dfs_recur(BinNode<T>* node);
-        
-    private:
-        BinNode<T>* _root;
+        void dfs_recur(Node* node);
+
+    protected:
+        Node* _root;
     public:
-        static BinNode<T>* make_node(const T& t)
+        static Node* make_node(const T& t)
         {
-            BinNode<T>* node = new BinNode<T>(t);
+            Node* node = new Node(t);
             node->color() = RED;
 
             node->lc() = nil;
@@ -90,15 +123,20 @@ class BinTree
 
 
 template<class T>
-BinNode<T>* BinTree<T>::nil = new BinNode<T>(-1);
+class RedBlackTree:public BinTree<T,BinNode<T>>
+{
+};
 
-template<class T>
-BinNode<T>* BinTree<T>::search(const T& t) const
+template<class T,class Node>
+Node* BinTree<T,Node>::nil = new Node(-1);
+
+template<class T,class Node>
+Node* BinTree<T,Node>::search(const T& t) const
 {
     return search_recur(_root, t);
 }
-template<class T>
-BinNode<T>* BinTree<T>::search_recur(BinNode<T>* node, const T& t) const
+template<class T,class Node>
+Node* BinTree<T,Node>::search_recur(Node* node, const T& t) const
 {
     if(node == nil) return nil;
     if(node->data() == t) return node;
@@ -113,8 +151,8 @@ BinNode<T>* BinTree<T>::search_recur(BinNode<T>* node, const T& t) const
     return nil;
 
 }
-template<class T>
-void BinTree<T>::dfs()
+    template<class T,class Node>
+void BinTree<T,Node>::dfs()
 {
     dfs_recur(_root);
 }
@@ -138,17 +176,17 @@ static const char* getColor(int color)
     }
     return "";
 }
-template <class T>
-void BinTree<T>::bfs()
+    template <class T,class Node>
+void BinTree<T,Node>::bfs()
 {
     if (_root == nil) return;
-    std::queue<BinNode<T>* > q;
+    std::queue<Node* > q;
     q.push(_root);
     int cur = 1;
     int next =0;
     while(q.size() > 0)
     {
-        BinNode<T>* node = q.front();
+        Node* node = q.front();
 
         q.pop();
         std::cout<<node->data() << " "<<getColor(node->color())<<"    ";
@@ -176,8 +214,8 @@ void BinTree<T>::bfs()
     std::cout<<std::endl;
 }
 
-    template<class T>
-void BinTree<T>::dfs_recur(BinNode<T>* node)
+    template<class T,class Node>
+void BinTree<T,Node>::dfs_recur(Node* node)
 {
     if(node->lc() != nil)
     {
@@ -190,8 +228,8 @@ void BinTree<T>::dfs_recur(BinNode<T>* node)
     std::cout<<" "<<node->data()<<" ";
 }
 
-    template<class T>
-BinNode<T>* BinTree<T>::minimum(BinNode<T>* node)
+    template<class T,class Node>
+Node* BinTree<T,Node>::minimum(Node* node)
 {
 
     while(node->lc() != nil)
@@ -203,8 +241,8 @@ BinNode<T>* BinTree<T>::minimum(BinNode<T>* node)
 
 }
 
-    template<class T>
-void BinTree<T>::transplant(BinNode<T>* u, BinNode<T>* v)
+    template<class T,class Node>
+void BinTree<T,Node>::transplant(Node* u, Node* v)
 {
     if(u->p() == nil)
     {
@@ -220,11 +258,11 @@ void BinTree<T>::transplant(BinNode<T>* u, BinNode<T>* v)
     }
     v->p() = u->p();
 }
-    template<class T>
-void BinTree<T>::deletenode(BinNode<T>* z)
+    template<class T,class Node>
+void BinTree<T,Node>::deletenode(Node* z)
 {
-    BinNode<T>* y = z;
-    BinNode<T>* x= nil;
+    Node* y = z;
+    Node* x= nil;
     int y_original_color = y->color();
     if (z->lc() == nil)
     {
@@ -264,10 +302,10 @@ void BinTree<T>::deletenode(BinNode<T>* z)
 
 }
 
-    template<class T>
-void BinTree<T>::delete_fixup(BinNode<T>* x)
+    template<class T,class Node>
+void BinTree<T,Node>::delete_fixup(Node* x)
 {
-    BinNode<T> * w;
+    Node * w;
     while( x != _root && x->color() == BLACK)
     {
         if(x == x->p()->lc())
@@ -335,10 +373,10 @@ void BinTree<T>::delete_fixup(BinNode<T>* x)
     }
     x->color() =BLACK;
 }
-    template<class T>
-void BinTree<T>::left_rotate(BinNode<T>* x)
+    template<class T,class Node>
+void BinTree<T,Node>::left_rotate(Node* x)
 {
-    BinNode<T>* y = x->rc();
+    Node* y = x->rc();
     x->rc() = y->lc();
     if(y->lc() != nil)
     {
@@ -360,11 +398,12 @@ void BinTree<T>::left_rotate(BinNode<T>* x)
     y->lc() = x;
     x->p() = y;
 }
-template<class T>
-void BinTree<T>::right_rotate(BinNode<T>* y)
+    template<class T,class Node>
+void BinTree<T,Node>::right_rotate(Node* y)
+
 {
 
-    BinNode<T>* x = y->lc();
+    Node* x = y->lc();
     y->lc()  = x->rc();
     if(x->rc() != nil)
     {
@@ -386,10 +425,10 @@ void BinTree<T>::right_rotate(BinNode<T>* y)
     x ->rc() = y;
     y->p() = x;
 }
-    template<class T>
-void BinTree<T>::insert_fixup(BinNode<T>* z)
+    template<class T,class Node>
+void BinTree<T,Node>::insert_fixup(Node* z)
 {
-    BinNode<T>* y;
+    Node* y;
     while(z->p()->color() == RED)
     {
         if(z->p() == z->p()->p()->lc())
@@ -443,11 +482,11 @@ void BinTree<T>::insert_fixup(BinNode<T>* z)
     _root->color() = BLACK;
 }
 
-    template<class T>
-void BinTree<T>::insert(BinNode<T>* node)
+    template<class T,class Node>
+void BinTree<T,Node>::insert(Node* node)
 {
-    BinNode<T>* y = nil;
-    BinNode<T>* x= _root;;
+    Node* y = nil;
+    Node* x= _root;;
     while (x != nil)
     {
         y = x;
